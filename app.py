@@ -25,26 +25,29 @@ st.set_page_config(
 )
 
 # ============================================================================
-# LOAD MODELS - SESUAI NAMA FILE DI GITHUB (DENGAN ANGKA 1)
+# LOAD MODELS - PERBAIKAN DI SINI
 # ============================================================================
 @st.cache_resource
 def load_models():
     try:
+        # Perbaikan: Menggunakan Dictionary {key: value} bukan Set
         model_paths = {
-            'nb_baseline.pkl',
-            'nb_optimized.pkl',
-            'svm_baseline.pkl',
-            'svm_optimized.pkl',
-            'tfidf.pkl',
-            'preprocessing_tools.pkl'
+            'nb_baseline': 'nb_baseline.pkl',
+            'nb_optimized': 'nb_optimized.pkl',
+            'svm_baseline': 'svm_baseline.pkl',
+            'svm_optimized': 'svm_optimized.pkl',
+            'tfidf': 'tfidf.pkl',
+            'tools': 'preprocessing_tools.pkl'
         }
         
+        # Cek keberadaan file
         for name, path in model_paths.items():
             if not os.path.exists(path):
-                st.error(f"❌ File tidak ditemukan: {path}")
+                st.error(f"❌ File tidak ditemukan di root: {path}")
                 return None
 
-        models = {
+        # Load Model Utama
+        loaded_models = {
             'nb_baseline': joblib.load(model_paths['nb_baseline']),
             'nb_optimized': joblib.load(model_paths['nb_optimized']),
             'svm_baseline': joblib.load(model_paths['svm_baseline']),
@@ -52,16 +55,18 @@ def load_models():
             'tfidf': joblib.load(model_paths['tfidf']),
         }
         
+        # Load Preprocessing Tools
         tools = joblib.load(model_paths['tools'])
-        models['stemmer'] = tools['stemmer']
-        models['stopword_remover'] = tools['stopword_remover']
-        models['additional_stopwords'] = tools.get('additional_stopwords', [])
+        loaded_models['stemmer'] = tools['stemmer']
+        loaded_models['stopword_remover'] = tools['stopword_remover']
+        loaded_models['additional_stopwords'] = tools.get('additional_stopwords', [])
         
-        return models
+        return loaded_models
     except Exception as e:
         st.error(f"❌ Error mendalam saat memuat model: {str(e)}")
         return None
 
+# Inisialisasi model
 models = load_models()
 
 # ============================================================================
@@ -69,29 +74,19 @@ models = load_models()
 # ============================================================================
 def get_preprocessing_steps(text, stemmer, stopword_remover, additional_stopwords):
     steps = {}
-    steps['original'] = {'text': text, 'char': len(text), 'words': len(text.split())}
-    
     text_lower = text.lower()
-    steps['casefolding'] = {'text': text_lower, 'char': len(text_lower), 'words': len(text_lower.split())}
-    
     text_clean = re.sub(r'http\S+|www\S+|https\S+|@\w+|#\w+|\d+', '', text_lower)
     text_clean = text_clean.translate(str.maketrans('', '', string.punctuation))
     text_clean = ' '.join(text_clean.split())
-    steps['cleaning'] = {'text': text_clean, 'char': len(text_clean), 'words': len(text_clean.split())}
     
     tokens = text_clean.split()
-    steps['tokenization'] = {'tokens': tokens, 'count': len(tokens)}
-    
     filtered = [w for w in tokens if w not in additional_stopwords and len(w) >= 3]
     text_no_stop = stopword_remover.remove(' '.join(filtered))
-    steps['stopword_removal'] = {'tokens': text_no_stop.split(), 'count': len(text_no_stop.split())}
     
     words_stemmed = [stemmer.stem(w) for w in text_no_stop.split()]
-    steps['stemming'] = {'tokens': words_stemmed, 'count': len(words_stemmed)}
-    
     final_result = ' '.join(words_stemmed)
-    steps['final'] = {'text': final_result, 'char': len(final_result), 'words': len(words_stemmed)}
     
+    steps['final'] = {'text': final_result}
     return steps
 
 # ============================================================================
@@ -104,7 +99,6 @@ if models:
     input_text = st.text_area("Masukkan Judul Berita:", "IHSG Menguat Tajam Hari Ini")
     
     if st.button("Analisis Sekarang"):
-        # 1. Jalankan Preprocessing
         steps = get_preprocessing_steps(
             input_text, 
             models['stemmer'], 
@@ -114,22 +108,19 @@ if models:
         
         clean_text_input = steps['final']['text']
 
-        # 2. Validasi Teks Hasil Preprocessing
         if not clean_text_input.strip():
-            st.warning("⚠️ Teks hasil preprocessing kosong. Mohon masukkan judul berita yang lebih lengkap.")
+            st.warning("⚠️ Teks hasil preprocessing kosong.")
         else:
             try:
-                # 3. Transformasi ke TF-IDF
+                # Transformasi & Prediksi
                 vec = models['tfidf'].transform([clean_text_input])
-                
-                # 4. Prediksi (Menggunakan SVM Optimized)
                 model_to_use = models['svm_optimized']
+                
                 prediction = model_to_use.predict(vec)[0]
                 prob = model_to_use.predict_proba(vec)[0]
                 confidence = max(prob) * 100
                 
-                # 5. Tampilkan Hasil
-                st.subheader("Hasil Preprocessing (Clean Text):")
+                st.subheader("Hasil Preprocessing:")
                 st.info(clean_text_input)
                 
                 st.markdown("---")
@@ -141,8 +132,7 @@ if models:
 
             except sklearn.exceptions.NotFittedError:
                 st.error("❌ Model TF-IDF belum dilatih (Not Fitted).")
-                st.info("Saran: Pastikan di Google Colab Anda menjalankan `tfidf.fit(X_train)` sebelum melakukan `joblib.dump`.")
             except Exception as e:
-                st.error(f"❌ Terjadi kesalahan saat prediksi: {str(e)}")
+                st.error(f"❌ Terjadi kesalahan: {str(e)}")
 else:
-    st.warning("⚠️ Aplikasi belum siap karena model gagal dimuat. Periksa file .pkl di GitHub Anda.")
+    st.warning("⚠️ Aplikasi belum siap karena model gagal dimuat.")
