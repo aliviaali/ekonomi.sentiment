@@ -36,7 +36,7 @@ def load_models():
             'nb_optimized': 'nb_optimized.pkl',
             'svm_baseline': 'svm_baseline.pkl',
             'svm_optimized': 'svm_optimized.pkl',
-            'tfidf': 'tfidf.pkl',
+            'tfidf': 'tfidf (1).pkl',
             'tools': 'preprocessing_tools.pkl'
         }
         
