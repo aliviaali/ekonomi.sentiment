@@ -33,10 +33,10 @@ def load_models():
     try:
         # Nama file disesuaikan persis dengan gambar (menggunakan spasi dan angka 1)
         model_paths = {
-            'nb_baseline': 'nb_baseline (1).pkl',
-            'nb_optimized': 'nb_optimized (1).pkl',
-            'svm_baseline': 'svm_baseline (1).pkl',
-            'svm_optimized': 'svm_optimized (1).pkl',
+            'nb_baseline': 'nb_baseline.pkl',
+            'nb_optimized': 'nb_optimized.pkl',
+            'svm_baseline': 'svm_baseline.pkl',
+            'svm_optimized': 'svm_optimized.pkl',
             'tfidf': 'tfidf.pkl',
             'tools': 'preprocessing_tools.pkl'
         }
