@@ -31,12 +31,12 @@ st.set_page_config(
 def load_models():
     try:
         model_paths = {
-            'nb_baseline': 'nb_baseline.pkl',
-            'nb_optimized': 'nb_optimized.pkl',
-            'svm_baseline': 'svm_baseline.pkl',
-            'svm_optimized': 'svm_optimized.pkl',
-            'tfidf': 'tfidf.pkl',
-            'tools': 'preprocessing_tools.pkl'
+            'nb_baseline.pkl',
+            'nb_optimized.pkl',
+            'svm_baseline.pkl',
+            'svm_optimized.pkl',
+            'tfidf.pkl',
+            'preprocessing_tools.pkl'
         }
         
         for name, path in model_paths.items():
