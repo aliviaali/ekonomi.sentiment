@@ -11,6 +11,8 @@ import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 import plotly.graph_objects as go
+import sklearn
+print(sklearn.__version__)
 
 # ============================================================================
 # PAGE CONFIGURATION
