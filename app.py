@@ -204,10 +204,12 @@ st.markdown("""
 # ============================================================================
 # LOAD MODELS
 # ============================================================================
+# Bagian LOAD MODELS yang diperbaiki
 @st.cache_resource
 def load_models():
-    """Load semua model dan preprocessing tools"""
     try:
+        # Gunakan nama file yang sesuai dengan yang ada di repository
+        # Jika di repo namanya ada (1), sesuaikan di sini atau rename filenya
         models = {
             'nb_baseline': joblib.load('nb_baseline.pkl'),
             'nb_optimized': joblib.load('nb_optimized.pkl'),
@@ -216,16 +218,18 @@ def load_models():
             'tfidf': joblib.load('tfidf.pkl'),
         }
         
-        # Load preprocessing tools
         tools = joblib.load('preprocessing_tools.pkl')
         models['stemmer'] = tools['stemmer']
         models['stopword_remover'] = tools['stopword_remover']
         models['additional_stopwords'] = tools['additional_stopwords']
         
         return models
+    except FileNotFoundError as e:
+        st.error(f"❌ File Model Tidak Ditemukan: {e.filename}")
+        st.info("Pastikan nama file di GitHub sama persis dengan yang dipanggil di kode (Case Sensitive).")
+        return None
     except Exception as e:
-        st.error(f"❌ Error loading models: {str(e)}")
-        st.info("Pastikan semua file .pkl ada di folder yang sama dengan aplikasi!")
+        st.error(f"❌ Error saat memuat model: {str(e)}")
         return None
 
 models = load_models()
